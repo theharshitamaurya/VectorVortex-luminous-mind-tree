@@ -1,139 +1,206 @@
-# VectorVortex-luminous-mind-tree - AI-Powered Knowledge Tree Game
+# VectorVortex - Semantic Knowledge Explorer for MongoDB
 
-<img width="1920" height="912" alt="VectorVortex-—-Semantic-Knowledge-Explorer-for-MongoDB" src="https://github.com/user-attachments/assets/b83d6ac3-ea4f-407a-bb32-70331710fd72" />
+VectorVortex is a semantic search and knowledge exploration platform built for the **Hack-N-Go with MongoDB** challenge.
 
+It transforms MongoDB from a system where users "search files" into a system where users **explore knowledge**.
+![VectorVortex-—-Semantic-Knowledge-Explorer-for-MongoDB](images/VectorVortex-—-Semantic-Knowledge-Explorer-for-MongoDB.png)
 
-- Live at: 
-- Live demo: 
+## Team
 
-A beautiful, interactive web game that combines the meditative puzzle mechanics of "Prune" with AI-powered knowledge exploration. Players grow knowledge trees by pruning branches while leveraging the Perplexity API to discover unique, real-time information on any topic. Each growth session returns fresh, non-redundant search results to build comprehensive understanding.
+- **Team Name**: VectorVortex
+- **Team Size**: 1
+- **Business Challenge**: Semantic Search Engine for MongoDB Documents
 
-## Project Summary
+## Problem Statement Fit
 
-**Purpose**: perplexitree transforms learning into an engaging, visual experience where users cultivate knowledge trees through strategic pruning and AI-enhanced exploration. The game addresses information overload by presenting unique, curated insights through an intuitive tree metaphor.
+Traditional keyword search fails when users do not know exact terms.
+VectorVortex solves this using **MongoDB Atlas Vector Search** and AI embeddings to return results by **meaning and intent**, not exact keyword match.
 
-**Technical Approach**: Built with a modular architecture featuring FastAPI backend and vanilla JavaScript frontend, the application integrates Perplexity's real-time search capabilities to generate unique knowledge areas for each growth session. The system ensures non-redundant information retrieval through intelligent query generation and structured output parsing.
+This aligns with expected outcomes:
 
-**Perplexity API Integration**: The game leverages Perplexity's reasoning and retrieval capabilities through a two-phase approach:
-- **Initial Search**: Uses Perplexity's `sonar-pro` chat completion model with structured JSON output to generate 5 unique knowledge areas from the initial query
-- **Subsequent Growth**: Uses Perplexity's search model with negative prompting to find unique web results for each new branch
-- **Flashcard Generation**: Uses `sonar-pro` chat completion to create study materials from search results
-- **Unique Results**: Negative prompting system ensures each growth session returns fresh, non-redundant information
+- Context-aware semantic search
+- Natural language query understanding
+- AI relevance matching
+- Better discoverability in unstructured data
+- Fast, API-driven search experience
 
-The integration ensures players receive diverse, comprehensive information while maintaining the game's meditative, focused learning experience.
+## What Makes VectorVortex Different
 
-## Features
+- **Semantic Knowledge Tree UI**
+  Search results are visualized as explorable branches, not a flat ranked list.
+- **Exclusion-Aware Growth**
+  Pruned/seen topics are used to avoid repetitive expansions and increase discovery diversity.
+- **Search + Learning in One Flow**
+  Flashcards and quizzes are generated directly from explored nodes.
+- **Compatibility-First Visualization**
+  Uses 3D graph when WebGL is available and automatically falls back when browser GPU/WebGL is restricted.
 
-- **AI-Powered Knowledge Tree**: Grow branches that represent real search results from Perplexity API
-- **Interactive Tools**: 7 different tools for managing your knowledge tree
-- **Unique Search Results**: Each growth session returns fresh, non-redundant information
-- **Study System**: Create flashcards from search results for enhanced learning
-- **Visual Progression**: Transform knowledge into flowers and fruits
-- **Game State Persistence**: Save and load your knowledge trees
+## Primary Users
 
-## Game Mechanics
+- Students and researchers
+- Business/data analysts
+- Developers and DevOps teams
+- Customer support teams
 
-### Tools Available
-1. **Growth Tool**: Click on nodes to grow new branches with search results
-2. **Cut Tool**: Click and drag to prune unwanted branches
-3. **Leaves Tool**: Create flashcards from search results on branches
-4. **Flower Tool**: Add flowers to branch ends (knowledge blossoming)
-5. **Fruit Tool**: Transform flowers into apples (fruit of labor)
-6. **Reposition Tool**: Drag branch ends to move and resize branches
-7. **Study Tool**: Hover over nodes to view search result details
-8. **Pan Tool**: Drag to move around the view
+## Architecture
 
-### Core Gameplay
-1. **Start**: Enter a search query to begin growing your knowledge tree
-2. **Grow**: Use the growth tool to expand branches with AI-powered search results
-3. **Prune**: Cut away branches that don't contribute to your learning goals
-4. **Study**: Create flashcards and study materials from your search results
-5. **Progress**: Watch your knowledge tree evolve with flowers and fruits
+- **Frontend**: React + TypeScript + Vite
+- **Backend API**: Node.js + Express
+- **AI Layer**: LangChain with provider switch (Gemini / OpenAI / Groq)
+- **Vector + Document Store**: MongoDB Atlas (`$vectorSearch`)
+- **Embeddings**: `@xenova/transformers` (MiniLM) in app pipeline
 
-## Installation & Setup
+## Core Modules
+
+- Module A: Document ingestion (`/api/ingest`)
+- Module B: Embedding pipeline and storage
+- Module C: Semantic explore/search (`/api/explore`)
+- Module D: Interactive knowledge tree UI
+- Module E: Learning tools (`/api/flashcards`, `/api/fruit`)
+
+## Key Features
+
+- Natural language semantic exploration
+- Tool-based graph interaction (Study, Grow, Prune, Cards, Learn, Quiz)
+- Local and cloud session save/load
+- Progress tracking via Knowledge Quests
+- 3D mode with graceful fallback mode
+
+## API Endpoints (Current)
+
+- `GET /api/status`
+- `POST /api/ingest`
+- `POST /api/explore`
+- `POST /api/flashcards`
+- `POST /api/fruit`
+- `POST /api/sessions/save`
+- `GET /api/sessions`
+- `GET /api/sessions/:id`
+
+## Local Setup
 
 ### Prerequisites
-- Python 3.8+
-- Virtual environment (recommended)
 
-### Quick Start
+- Node.js 18+
+- npm
+- MongoDB Atlas cluster with vector index configured (`vector_index`)
 
-1. Navigate to the backend directory:
+### 1) Clone and install
+
 ```bash
-cd backend
+git clone https://github.com/theharshitamaurya/VectorVortex-luminous-mind-tree.git
+cd VectorVortex-luminous-mind-tree
+npm install
 ```
 
-2. Create and activate a virtual environment:
+### 2) Configure environment
+
+Create `.env` from `.env.example`:
+
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+cp .env.example .env
 ```
 
-3. Install dependencies:
+Set at minimum:
+
+- `MONGODB_URI`
+- One provider key (for selected `AI_PROVIDER`)
+
+### 3) Run
+
 ```bash
-pip install -r requirements.txt
+npm run dev
 ```
 
-4. Run the server:
+App starts on `http://localhost:3000` (or next free port).
+
+### 4) Build (optional)
+
 ```bash
-python main.py
+npm run build
+npm run preview
 ```
 
-5. Open your browser and go to: `http://localhost:8001`
+## Demo Dataset
 
-### Environment Variables
-Create a `.env` file in the `backend/` directory:
-```
-PERPLEXITY_API_KEY=your_perplexity_api_key_here
-```
-## Technical Implementation
+Sample markdown docs are available in `test/`.
+Recommended demo queries:
 
-### Architecture
-- **Backend**: FastAPI server with SQLite database
-- **Frontend**: Vanilla JavaScript with HTML5 Canvas rendering
-- **AI Integration**: Perplexity API for real-time knowledge generation
+- `How do we secure MongoDB in cloud-native apps?`
+- `How can I reduce slow query issues in Atlas?`
+- `What controls are needed for compliance with MongoDB data?`
 
-### Key API Endpoints
+## Hackathon Demo Flow (Short)
 
-**`POST /api/search`** - Initial Knowledge Tree Creation
-- Uses Perplexity `sonar-pro` with structured JSON output
-- Generates exactly 5 unique knowledge areas from user query
+1. Ingest sample docs
+2. Run natural language query
+3. Expand/prune branches to show semantic discovery
+4. Generate flashcards
+5. Generate quiz from learned node
+6. Save and reload session
+7. Show 3D/fallback compatibility behavior
 
-**`POST /api/web-search`** - Branch Growth with Negative Prompting
-- **Key Feature**: Uses negative prompting to exclude existing results
-- Ensures each growth session returns fresh, non-redundant information
-- Constructs queries like: `"machine learning -"existing result 1" -"existing result 2"`
+## Judging Criteria Mapping
 
-**`POST /api/save-game-state`** - Public Game Storage
-- Saves complete game state (public saves - all games are shareable)
-- Stores branches, search results, flashcards, and visual elements
+### Innovation and Relevance
 
-**`POST /api/create-flashcards`** - AI Study Material Generation
-- Uses Perplexity to create flashcards from search content
-- Links flashcards to specific tree nodes with difficulty ratings
+- Replaces flat semantic result lists with an explorable knowledge tree.
+- Introduces exclusion-aware branch growth to reduce repetitive retrieval.
+- Combines retrieval and learning (flashcards + quiz) in a single workflow.
 
-### Perplexity API Integration
+### Technical Implementation
 
-#### Two-Phase Approach
-1. **Initial Search**: `sonar-pro` chat completion for structured knowledge areas
-2. **Subsequent Growth**: Search API with negative prompting for unique results
+- Uses MongoDB Atlas Vector Search (`$vectorSearch`) for semantic retrieval.
+- Node/Express orchestration with modular API endpoints.
+- AI generation chains for growth, flashcards, and quiz.
+- React-based interactive graph UI with tool-driven interaction model.
 
-#### Negative Prompting Strategy
-- **Purpose**: Prevents redundant information across growth sessions
-- **Implementation**: Excludes existing search result titles and snippets
-- **Result**: Each branch growth returns fresh, unique content
+### Feasibility and Scalability
 
-### Database Design
-- **Relational Model**: GameSession → SearchResult → Branch hierarchy
-- **Public Access**: All saved games are publicly accessible
-- **Cascade Deletion**: Automatic cleanup when sessions are deleted
+- Single primary data platform (MongoDB Atlas) keeps operational complexity low.
+- Stateless API endpoints and session persistence (local + cloud) support real use.
+- Compatible fallback mode ensures reliability in restricted browser environments.
 
-### Key Technologies
-**Backend**: FastAPI, SQLAlchemy, Perplexity API  
-**Frontend**: HTML5 Canvas, Vanilla JavaScript  
-**Database**: SQLite with relational modeling
+### Impact and Presentation
 
-## License
+- Demonstrates measurable productivity value for search-heavy teams.
+- Improves learning/onboarding through active exploration and knowledge checks.
+- Demo flow is narrative-friendly: ingest -> explore -> prune -> learn -> assess -> persist.
 
-Created for Perplexity Hackathon. Tree growth/prune mechanic inspired by Prune game by Joel McDonald.
-"# VectorVortex-luminous-mind-tree" 
+## 2-Minute Pitch Script
+
+Hello judges, I’m Harshita from team VectorVortex.
+
+Our problem is that traditional MongoDB document search is keyword-dependent.  
+If users don’t know exact terms, they miss relevant knowledge.
+
+VectorVortex solves this by using MongoDB Atlas Vector Search and AI embeddings to search by meaning, not exact words.
+
+The key difference is the interface and workflow: instead of returning a flat ranked list, we build an interactive knowledge tree.  
+Users can expand branches to explore related concepts, prune irrelevant paths, and continue discovery with better focus.
+
+We also use exclusion-aware growth.  
+When users prune topics, those become negative context, so future expansions avoid repeating the same ideas and surface fresher insights.
+
+Then we move from retrieval to learning.  
+From any explored branch, users generate flashcards and quizzes instantly.  
+So this is not just a search engine, it’s a knowledge understanding system.
+
+Technically, the system uses React on frontend, Node/Express on backend, AI chains for generation, and MongoDB Atlas as the vector-enabled document store.
+
+For reliability, if a browser blocks WebGL, the app automatically switches to compatibility mode so the full workflow still runs during evaluation.
+
+Business impact: faster document discovery, faster onboarding, and higher productivity across analysts, support teams, and developers.
+
+One line summary: VectorVortex transforms MongoDB semantic search from finding documents into exploring and understanding knowledge.
+
+## Business and Social Impact
+
+- Reduces time spent searching internal knowledge
+- Improves onboarding speed
+- Increases analyst/support productivity
+- Makes semantic AI search more accessible to non-expert users
+
+## One-Line Summary
+
+**VectorVortex transforms MongoDB semantic search from "finding documents" into "exploring and understanding knowledge."**
