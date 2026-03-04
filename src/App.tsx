@@ -53,12 +53,48 @@ const SESSION_STORAGE_KEY = "vectorvortex.saved.sessions.v1";
 const MAX_SAVED_SESSIONS = 12;
 
 const TOOL_DEFS = [
-  { id: "study" as Tool, icon: BookOpen, color: "#06b6d4", label: "Study", tip: "Click node to inspect" },
-  { id: "growth" as Tool, icon: Plus, color: "#10b981", label: "Grow", tip: "Expand node with related topics" },
-  { id: "prune" as Tool, icon: Scissors, color: "#f59e0b", label: "Prune", tip: "Remove subtree from graph" },
-  { id: "flashcard" as Tool, icon: Leaf, color: "#8b5cf6", label: "Leaf", tip: "Generate flashcards" },
-  { id: "blossom" as Tool, icon: Flower2, color: "#ec4899", label: "Blossom", tip: "Mark as learned" },
-  { id: "fruit" as Tool, icon: Apple, color: "#ef4444", label: "Quiz", tip: "Generate quiz from learned path" },
+  {
+    id: "study" as Tool,
+    icon: BookOpen,
+    color: "#06b6d4",
+    label: "Study",
+    tip: "Click node to inspect",
+  },
+  {
+    id: "growth" as Tool,
+    icon: Plus,
+    color: "#10b981",
+    label: "Grow",
+    tip: "Expand node with related topics",
+  },
+  {
+    id: "prune" as Tool,
+    icon: Scissors,
+    color: "#f59e0b",
+    label: "Prune",
+    tip: "Remove subtree from graph",
+  },
+  {
+    id: "flashcard" as Tool,
+    icon: Leaf,
+    color: "#8b5cf6",
+    label: "Leaf",
+    tip: "Generate flashcards",
+  },
+  {
+    id: "blossom" as Tool,
+    icon: Flower2,
+    color: "#ec4899",
+    label: "Blossom",
+    tip: "Mark as learned",
+  },
+  {
+    id: "fruit" as Tool,
+    icon: Apple,
+    color: "#ef4444",
+    label: "Quiz",
+    tip: "Generate quiz from learned path",
+  },
 ];
 
 function normalizeText(value: any, fallback = ""): string {
@@ -68,7 +104,13 @@ function normalizeText(value: any, fallback = ""): string {
 function ScoreRing({ score }: { score: number }) {
   const pct = Math.round(score * 100);
   const color =
-    pct >= 80 ? "#10b981" : pct >= 60 ? "#06b6d4" : pct >= 40 ? "#f59e0b" : "#94a3b8";
+    pct >= 80
+      ? "#10b981"
+      : pct >= 60
+        ? "#06b6d4"
+        : pct >= 40
+          ? "#f59e0b"
+          : "#94a3b8";
   return (
     <div
       className="score-ring"
@@ -87,17 +129,34 @@ function FlashCard({ card, index }: { card: Flashcard; index: number }) {
       onClick={() => setFlipped((v) => !v)}
       style={{ marginBottom: 8 }}
     >
-      <div className="flip-card-inner" style={{ minHeight: 72, position: "relative" }}>
+      <div
+        className="flip-card-inner"
+        style={{ minHeight: 72, position: "relative" }}
+      >
         <div
           className="flip-face vv-card"
           style={{ padding: "12px 14px", minHeight: 72 }}
         >
           <div
-            style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "#67e8f9", marginBottom: 4, fontWeight: 700 }}
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "#67e8f9",
+              marginBottom: 4,
+              fontWeight: 700,
+            }}
           >
             Q {index + 1} · tap to flip
           </div>
-          <div style={{ fontSize: 12, color: "var(--vv-text-primary)", fontWeight: 500, lineHeight: 1.45 }}>
+          <div
+            style={{
+              fontSize: 12,
+              color: "var(--vv-text-primary)",
+              fontWeight: 500,
+              lineHeight: 1.45,
+            }}
+          >
             {card.question}
           </div>
         </div>
@@ -111,11 +170,24 @@ function FlashCard({ card, index }: { card: Flashcard; index: number }) {
           }}
         >
           <div
-            style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c4b5fd", marginBottom: 4, fontWeight: 700 }}
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "#c4b5fd",
+              marginBottom: 4,
+              fontWeight: 700,
+            }}
           >
             Answer
           </div>
-          <div style={{ fontSize: 12, color: "var(--vv-text-primary)", lineHeight: 1.45 }}>
+          <div
+            style={{
+              fontSize: 12,
+              color: "var(--vv-text-primary)",
+              lineHeight: 1.45,
+            }}
+          >
             {card.answer}
           </div>
         </div>
@@ -129,21 +201,30 @@ export default function App() {
   const [activeTool, setActiveTool] = useState<Tool>("study");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sessionStatus, setSessionStatus] = useState("Enter a query to begin exploring");
+  const [sessionStatus, setSessionStatus] = useState(
+    "Enter a query to begin exploring",
+  );
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
-  const [quizResult, setQuizResult] = useState<{ correct: number; total: number } | null>(null);
+  const [quizResult, setQuizResult] = useState<{
+    correct: number;
+    total: number;
+  } | null>(null);
   const [quizNodeId, setQuizNodeId] = useState<string | null>(null);
   const [loadingNodeIds, setLoadingNodeIds] = useState<Set<string>>(new Set());
   const [showUpload, setShowUpload] = useState(false);
   const [ritualMode, setRitualMode] = useState(false);
   const ritualRef = React.useRef(0);
   const [filters, setFilters] = useState({ synthetic: true, real: true });
-  const [dbStatus, setDbStatus] = useState<"connected" | "disconnected" | "checking">("checking");
+  const [dbStatus, setDbStatus] = useState<
+    "connected" | "disconnected" | "checking"
+  >("checking");
   const [savedSessions, setSavedSessions] = useState<SavedSession[]>([]);
   const [cloudSessions, setCloudSessions] = useState<CloudSessionSummary[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const [activeCloudSessionId, setActiveCloudSessionId] = useState<string | null>(null);
+  const [activeCloudSessionId, setActiveCloudSessionId] = useState<
+    string | null
+  >(null);
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth <= 1024 : false,
   );
@@ -170,7 +251,11 @@ export default function App() {
   useEffect(() => {
     axios
       .get("/api/status")
-      .then((res) => setDbStatus(res.data.status === "connected" ? "connected" : "disconnected"))
+      .then((res) =>
+        setDbStatus(
+          res.data.status === "connected" ? "connected" : "disconnected",
+        ),
+      )
       .catch(() => setDbStatus("disconnected"));
   }, []);
 
@@ -188,7 +273,11 @@ export default function App() {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        setSavedSessions(parsed.filter((s) => s && s.graphData && Array.isArray(s.graphData.nodes)));
+        setSavedSessions(
+          parsed.filter(
+            (s) => s && s.graphData && Array.isArray(s.graphData.nodes),
+          ),
+        );
       }
     } catch {
       // Ignore corrupted local storage payload.
@@ -208,7 +297,10 @@ export default function App() {
   const persistSessions = (sessions: SavedSession[]) => {
     setSavedSessions(sessions);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessions));
+      window.localStorage.setItem(
+        SESSION_STORAGE_KEY,
+        JSON.stringify(sessions),
+      );
     }
   };
 
@@ -229,7 +321,9 @@ export default function App() {
     });
     setQuery(payload.query || "");
     setQuiz(Array.isArray(payload.quiz) ? payload.quiz : []);
-    setQuizAnswers(Array.isArray(payload.quizAnswers) ? payload.quizAnswers : []);
+    setQuizAnswers(
+      Array.isArray(payload.quizAnswers) ? payload.quizAnswers : [],
+    );
     setQuizResult(payload.quizResult || null);
     setQuizNodeId(payload.selectedNodeId || null);
     setFilters(payload.filters || { synthetic: true, real: true });
@@ -239,7 +333,9 @@ export default function App() {
   const refreshCloudSessions = async () => {
     try {
       const response = await axios.get("/api/sessions");
-      setCloudSessions(Array.isArray(response.data?.sessions) ? response.data.sessions : []);
+      setCloudSessions(
+        Array.isArray(response.data?.sessions) ? response.data.sessions : [],
+      );
     } catch {
       setCloudSessions([]);
     }
@@ -255,7 +351,9 @@ export default function App() {
 
   const saveSession = () => {
     if (graphData.nodes.length === 0) {
-      setSessionStatus("Nothing to save yet. Explore at least one topic first.");
+      setSessionStatus(
+        "Nothing to save yet. Explore at least one topic first.",
+      );
       return;
     }
 
@@ -273,10 +371,10 @@ export default function App() {
       filters: { ...filters },
     };
 
-    const next = [snapshot, ...savedSessions.filter((s) => s.id !== snapshot.id)].slice(
-      0,
-      MAX_SAVED_SESSIONS,
-    );
+    const next = [
+      snapshot,
+      ...savedSessions.filter((s) => s.id !== snapshot.id),
+    ].slice(0, MAX_SAVED_SESSIONS);
     persistSessions(next);
     setActiveSessionId(snapshot.id);
     setSessionStatus(`Session saved (${next.length}/${MAX_SAVED_SESSIONS})`);
@@ -302,12 +400,16 @@ export default function App() {
     setActiveSessionId(target.id);
     setQuizNodeId(target.selectedNodeId || null);
     setError(null);
-    setSessionStatus(`Loaded session from ${new Date(target.savedAt).toLocaleString()}`);
+    setSessionStatus(
+      `Loaded session from ${new Date(target.savedAt).toLocaleString()}`,
+    );
   };
 
   const saveSessionToCloud = async () => {
     if (graphData.nodes.length === 0) {
-      setSessionStatus("Nothing to save yet. Explore at least one topic first.");
+      setSessionStatus(
+        "Nothing to save yet. Explore at least one topic first.",
+      );
       return;
     }
 
@@ -352,7 +454,9 @@ export default function App() {
         filters: snapshot.filters || { synthetic: true, real: true },
       });
       setActiveCloudSessionId(sessionId);
-      setSessionStatus(`Loaded cloud session from ${new Date(response.data?.savedAt).toLocaleString()}`);
+      setSessionStatus(
+        `Loaded cloud session from ${new Date(response.data?.savedAt).toLocaleString()}`,
+      );
     } catch (e: any) {
       setSessionStatus(e.response?.data?.error || "Cloud load failed.");
     }
@@ -391,8 +495,10 @@ export default function App() {
     if (!rootId) return [selectedNode?.label || "Topic"];
     const parents = new Map<string, string>();
     for (const link of graphData.links) {
-      const src = typeof link.source === "string" ? link.source : (link.source as any).id;
-      const tgt = typeof link.target === "string" ? link.target : (link.target as any).id;
+      const src =
+        typeof link.source === "string" ? link.source : (link.source as any).id;
+      const tgt =
+        typeof link.target === "string" ? link.target : (link.target as any).id;
       if (!parents.has(tgt)) parents.set(tgt, src);
     }
     const pathIds: string[] = [];
@@ -410,7 +516,11 @@ export default function App() {
 
   const explore = async (
     node: GraphNode,
-    opts?: { isRoot?: boolean; visibleIdsOverride?: string[]; retryCount?: number }
+    opts?: {
+      isRoot?: boolean;
+      visibleIdsOverride?: string[];
+      retryCount?: number;
+    },
   ) => {
     setError(null);
     setIsLoading(true);
@@ -443,7 +553,9 @@ export default function App() {
       }
 
       appendChildren(node.id, nodes);
-      setSessionStatus(`${uniqueNew} new node${uniqueNew !== 1 ? "s" : ""} discovered`);
+      setSessionStatus(
+        `${uniqueNew} new node${uniqueNew !== 1 ? "s" : ""} discovered`,
+      );
     } catch (e: any) {
       setError(e.response?.data?.error || e.message || "Explore failed");
       setSessionStatus("Search failed.");
@@ -470,7 +582,9 @@ export default function App() {
       updateNode(node.id, { flashcards, type: "leaf" });
       setSessionStatus(`${flashcards.length} flashcards generated`);
     } catch (e: any) {
-      setError(e.response?.data?.error || e.message || "Flashcard generation failed");
+      setError(
+        e.response?.data?.error || e.message || "Flashcard generation failed",
+      );
       setSessionStatus("Flashcard generation failed.");
     } finally {
       markNodeLoading(node.id, false);
@@ -484,7 +598,9 @@ export default function App() {
 
   const generateFruitQuiz = async (node: GraphNode) => {
     if (!node.completed) {
-      setSessionStatus("Only blossomed nodes can bear fruit. Mark as learned first.");
+      setSessionStatus(
+        "Only blossomed nodes can bear fruit. Mark as learned first.",
+      );
       return;
     }
     markNodeLoading(node.id, true);
@@ -500,7 +616,9 @@ export default function App() {
       setQuizNodeId(node.id);
       setSessionStatus("Quiz generated — answer to test your knowledge");
     } catch (e: any) {
-      setError(e.response?.data?.error || e.message || "Quiz generation failed");
+      setError(
+        e.response?.data?.error || e.message || "Quiz generation failed",
+      );
     } finally {
       markNodeLoading(node.id, false);
     }
@@ -521,21 +639,36 @@ export default function App() {
       setQuizNodeId(null);
     }
     if (activeTool === "study") return;
-    if (activeTool === "growth") { await explore(node); return; }
+    if (activeTool === "growth") {
+      await explore(node);
+      return;
+    }
     if (activeTool === "prune") {
       pruneSubtree(node.id);
       setSessionStatus(`Pruned ${node.label}`);
       return;
     }
-    if (activeTool === "flashcard") { await generateFlashcards(node); return; }
-    if (activeTool === "blossom") { blossomNode(node); return; }
-    if (activeTool === "fruit") { await generateFruitQuiz(node); }
+    if (activeTool === "flashcard") {
+      await generateFlashcards(node);
+      return;
+    }
+    if (activeTool === "blossom") {
+      blossomNode(node);
+      return;
+    }
+    if (activeTool === "fruit") {
+      await generateFruitQuiz(node);
+    }
   };
 
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.tagName === "INPUT" || (e.target as HTMLElement)?.tagName === "TEXTAREA") return;
+      if (
+        (e.target as HTMLElement)?.tagName === "INPUT" ||
+        (e.target as HTMLElement)?.tagName === "TEXTAREA"
+      )
+        return;
       if (e.key >= "1" && e.key <= "6") {
         setActiveTool(TOOL_DEFS[Number(e.key) - 1].id);
       }
@@ -556,7 +689,8 @@ export default function App() {
         setSessionStatus("Ritual complete — knowledge grove expanded");
         return;
       }
-      const node = selectedNode || graphData.nodes.find((n) => n.type === "root");
+      const node =
+        selectedNode || graphData.nodes.find((n) => n.type === "root");
       if (node) void explore(node);
       setSessionStatus(`Ritual pulse ${ritualRef.current}/5...`);
     }, 3200);
@@ -574,7 +708,10 @@ export default function App() {
     setQuizNodeId(null);
     setActiveSessionId(null);
     const rootNode = seedRoot(trimmed);
-    await explore(rootNode, { isRoot: true, visibleIdsOverride: [rootNode.id] });
+    await explore(rootNode, {
+      isRoot: true,
+      visibleIdsOverride: [rootNode.id],
+    });
   };
 
   const submitQuiz = () => {
@@ -599,13 +736,15 @@ export default function App() {
           if (n.synthetic) return filters.synthetic;
           return filters.real;
         })
-        .map((n) => n.id)
+        .map((n) => n.id),
     );
     return {
       nodes: graphData.nodes.filter((n) => visibleSet.has(n.id)),
       links: graphData.links.filter((l) => {
-        const src = typeof l.source === "string" ? l.source : (l.source as any).id;
-        const tgt = typeof l.target === "string" ? l.target : (l.target as any).id;
+        const src =
+          typeof l.source === "string" ? l.source : (l.source as any).id;
+        const tgt =
+          typeof l.target === "string" ? l.target : (l.target as any).id;
         return visibleSet.has(src) && visibleSet.has(tgt);
       }),
     };
@@ -642,13 +781,21 @@ export default function App() {
         }}
       >
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexShrink: 0,
+          }}
+        >
           <div
             style={{
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: "linear-gradient(135deg, rgba(124,58,237,0.5), rgba(6,182,212,0.4))",
+              background:
+                "linear-gradient(135deg, rgba(124,58,237,0.5), rgba(6,182,212,0.4))",
               border: "1px solid rgba(124,58,237,0.5)",
               display: "flex",
               alignItems: "center",
@@ -661,11 +808,22 @@ export default function App() {
           <div>
             <div
               className="gradient-primary font-display"
-              style={{ fontWeight: 800, fontSize: 17, letterSpacing: "-0.01em" }}
+              style={{
+                fontWeight: 800,
+                fontSize: 17,
+                letterSpacing: "-0.01em",
+              }}
             >
               VectorVortex
             </div>
-            <div style={{ fontSize: 9, color: "var(--vv-text-muted)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+            <div
+              style={{
+                fontSize: 9,
+                color: "var(--vv-text-muted)",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+              }}
+            >
               Semantic Knowledge Explorer
             </div>
           </div>
@@ -750,7 +908,11 @@ export default function App() {
             {isMobile ? "Ingest" : "Ingest Docs"}
           </button>
 
-          <button className="btn btn-ghost btn-sm" onClick={saveSession} style={{ gap: 5 }}>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={saveSession}
+            style={{ gap: 5 }}
+          >
             <Database size={12} />
             Save
           </button>
@@ -775,7 +937,11 @@ export default function App() {
             Load
           </button>
 
-          <button className="btn btn-ghost btn-sm" onClick={clearWorkspace} style={{ gap: 5 }}>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={clearWorkspace}
+            style={{ gap: 5 }}
+          >
             <Scissors size={12} />
             New
           </button>
@@ -784,8 +950,12 @@ export default function App() {
             className="btn btn-sm"
             onClick={() => setRitualMode((v) => !v)}
             style={{
-              background: ritualMode ? "rgba(124,58,237,0.2)" : "rgba(255,255,255,0.04)",
-              border: ritualMode ? "1px solid rgba(124,58,237,0.4)" : "1px solid var(--vv-border-subtle)",
+              background: ritualMode
+                ? "rgba(124,58,237,0.2)"
+                : "rgba(255,255,255,0.04)",
+              border: ritualMode
+                ? "1px solid rgba(124,58,237,0.4)"
+                : "1px solid var(--vv-border-subtle)",
               color: ritualMode ? "#c4b5fd" : "var(--vv-text-muted)",
               gap: 5,
             }}
@@ -802,7 +972,11 @@ export default function App() {
             >
               <ChevronRight
                 size={12}
-                style={{ transform: showMobileInspector ? "rotate(90deg)" : "rotate(0deg)" }}
+                style={{
+                  transform: showMobileInspector
+                    ? "rotate(90deg)"
+                    : "rotate(0deg)",
+                }}
               />
               Inspector
             </button>
@@ -816,10 +990,19 @@ export default function App() {
               style={{
                 width: 6,
                 height: 6,
-                background: dbStatus === "connected" ? "#10b981" : dbStatus === "checking" ? "#7c3aed" : "#ef4444",
+                background:
+                  dbStatus === "connected"
+                    ? "#10b981"
+                    : dbStatus === "checking"
+                      ? "#7c3aed"
+                      : "#ef4444",
               }}
             />
-            {dbStatus === "connected" ? "Atlas Connected" : dbStatus === "checking" ? "Connecting..." : "Offline"}
+            {dbStatus === "connected"
+              ? "Atlas Connected"
+              : dbStatus === "checking"
+                ? "Connecting..."
+                : "Offline"}
           </div>
 
           {!isMobile && savedSessions.length > 0 && (
@@ -828,9 +1011,10 @@ export default function App() {
               onChange={(e) => e.target.value && loadSession(e.target.value)}
               className="vv-input"
               style={{
-                maxWidth: 220,
-                padding: "6px 10px",
-                fontSize: 11,
+                width: 110,
+                maxWidth: 110,
+                padding: "5px 6px",
+                fontSize: 9,
                 background: "rgba(255,255,255,0.03)",
               }}
             >
@@ -839,7 +1023,8 @@ export default function App() {
               </option>
               {savedSessions.map((session) => (
                 <option key={session.id} value={session.id}>
-                  {session.query} · {new Date(session.savedAt).toLocaleTimeString()}
+                  {session.query} ·{" "}
+                  {new Date(session.savedAt).toLocaleTimeString()}
                 </option>
               ))}
             </select>
@@ -848,12 +1033,15 @@ export default function App() {
           {!isMobile && cloudSessions.length > 0 && (
             <select
               value={activeCloudSessionId || ""}
-              onChange={(e) => e.target.value && void loadCloudSession(e.target.value)}
+              onChange={(e) =>
+                e.target.value && void loadCloudSession(e.target.value)
+              }
               className="vv-input"
               style={{
-                maxWidth: 220,
-                padding: "6px 10px",
-                fontSize: 11,
+                width: 110,
+                maxWidth: 110,
+                padding: "5px 5px",
+                fontSize: 9,
                 background: "rgba(255,255,255,0.03)",
               }}
             >
@@ -895,7 +1083,9 @@ export default function App() {
           flex: 1,
           minHeight: 0,
           display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "64px minmax(0, 1fr) minmax(0, 1fr)",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "64px minmax(0, 1fr) minmax(0, 1fr)",
           gridTemplateRows: isMobile ? "auto 1fr" : "1fr",
           gap: isMobile ? 8 : 10,
           padding: isMobile ? "8px" : "10px 10px 10px 10px",
@@ -930,7 +1120,9 @@ export default function App() {
                   width: isMobile ? 72 : "100%",
                   minWidth: isMobile ? 72 : "unset",
                   background: active ? `${tool.color}22` : "transparent",
-                  border: active ? `1px solid ${tool.color}55` : "1px solid transparent",
+                  border: active
+                    ? `1px solid ${tool.color}55`
+                    : "1px solid transparent",
                   color: active ? tool.color : "var(--vv-text-muted)",
                   boxShadow: active ? `0 0 12px ${tool.color}25` : "none",
                   position: "relative",
@@ -967,7 +1159,9 @@ export default function App() {
           {/* Filter mini-buttons */}
           <button
             title="Toggle synthetic (AI-generated) nodes"
-            onClick={() => setFilters((f) => ({ ...f, synthetic: !f.synthetic }))}
+            onClick={() =>
+              setFilters((f) => ({ ...f, synthetic: !f.synthetic }))
+            }
             style={{
               width: isMobile ? 60 : "100%",
               minWidth: isMobile ? 60 : "unset",
@@ -977,8 +1171,12 @@ export default function App() {
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.06em",
-              border: filters.synthetic ? "1px solid rgba(124,58,237,0.4)" : "1px solid var(--vv-border-subtle)",
-              background: filters.synthetic ? "rgba(124,58,237,0.1)" : "transparent",
+              border: filters.synthetic
+                ? "1px solid rgba(124,58,237,0.4)"
+                : "1px solid var(--vv-border-subtle)",
+              background: filters.synthetic
+                ? "rgba(124,58,237,0.1)"
+                : "transparent",
               color: filters.synthetic ? "#c4b5fd" : "var(--vv-text-muted)",
               cursor: "pointer",
               textAlign: "center",
@@ -998,7 +1196,9 @@ export default function App() {
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.06em",
-              border: filters.real ? "1px solid rgba(6,182,212,0.4)" : "1px solid var(--vv-border-subtle)",
+              border: filters.real
+                ? "1px solid rgba(6,182,212,0.4)"
+                : "1px solid var(--vv-border-subtle)",
               background: filters.real ? "rgba(6,182,212,0.08)" : "transparent",
               color: filters.real ? "#67e8f9" : "var(--vv-text-muted)",
               cursor: "pointer",
@@ -1010,7 +1210,10 @@ export default function App() {
         </aside>
 
         {/* ── KNOWLEDGE GRAPH VIEWPORT ── */}
-        <section className="vv-panel vv-graph-panel" style={{ position: "relative", minHeight: 0 }}>
+        <section
+          className="vv-panel vv-graph-panel"
+          style={{ position: "relative", minHeight: 0 }}
+        >
           <KnowledgeForest
             data={filteredGraphData}
             onNodeClick={(node) => void handleToolAction(node)}
@@ -1048,7 +1251,8 @@ export default function App() {
                     width: 80,
                     height: 80,
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.15))",
+                    background:
+                      "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.15))",
                     border: "1px solid rgba(124,58,237,0.25)",
                     display: "flex",
                     alignItems: "center",
@@ -1072,12 +1276,32 @@ export default function App() {
                 >
                   Your Knowledge Awaits
                 </div>
-                <div style={{ fontSize: 13, color: "var(--vv-text-muted)", lineHeight: 1.6, marginBottom: 20 }}>
-                  Type any topic in the search bar to begin semantic exploration.
-                  Ingest documents first to search your own knowledge base.
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: "var(--vv-text-muted)",
+                    lineHeight: 1.6,
+                    marginBottom: 20,
+                  }}
+                >
+                  Type any topic in the search bar to begin semantic
+                  exploration. Ingest documents first to search your own
+                  knowledge base.
                 </div>
-                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-                  {["MongoDB Atlas", "Vector Search", "RAG Architecture", "Neural Embeddings"].map((s) => (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {[
+                    "MongoDB Atlas",
+                    "Vector Search",
+                    "RAG Architecture",
+                    "Neural Embeddings",
+                  ].map((s) => (
                     <button
                       key={s}
                       style={{
@@ -1125,7 +1349,9 @@ export default function App() {
               textOverflow: "ellipsis",
             }}
           >
-            {isLoading && <Loader2 size={11} className="animate-spin" color="#7c3aed" />}
+            {isLoading && (
+              <Loader2 size={11} className="animate-spin" color="#7c3aed" />
+            )}
             {sessionStatus}
           </div>
 
@@ -1147,7 +1373,16 @@ export default function App() {
               maxWidth: isMobile ? 156 : "unset",
             }}
           >
-            <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--vv-text-muted)", marginBottom: 2, fontWeight: 700 }}>
+            <div
+              style={{
+                fontSize: 9,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                color: "var(--vv-text-muted)",
+                marginBottom: 2,
+                fontWeight: 700,
+              }}
+            >
               Node Types
             </div>
             {[
@@ -1156,9 +1391,14 @@ export default function App() {
               { dot: "stat-dot-primary", label: "AI Gap Bridge" },
               { dot: "stat-dot-pink", label: "Learned" },
             ].map(({ dot, label }) => (
-              <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div
+                key={label}
+                style={{ display: "flex", alignItems: "center", gap: 6 }}
+              >
                 <span className={`stat-dot ${dot}`} />
-                <span style={{ color: "var(--vv-text-secondary)" }}>{label}</span>
+                <span style={{ color: "var(--vv-text-secondary)" }}>
+                  {label}
+                </span>
               </div>
             ))}
           </div>
@@ -1183,446 +1423,564 @@ export default function App() {
 
         {/* ── INSPECTOR PANEL ── */}
         {!isMobile && (
-        <aside
-          className="vv-panel vv-inspector"
-          style={{
-            background: "var(--vv-bg-panel)",
-            border: "1px solid var(--vv-border-subtle)",
-            borderRadius: "var(--vv-radius)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          {/* Quest Board */}
-          <div
-            className="vv-quest-board"
+          <aside
+            className="vv-panel vv-inspector"
             style={{
-              padding: "12px 14px",
-              borderBottom: "1px solid var(--vv-border-subtle)",
-              background: "rgba(245,158,11,0.04)",
+              background: "var(--vv-bg-panel)",
+              border: "1px solid var(--vv-border-subtle)",
+              borderRadius: "var(--vv-radius)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
             }}
           >
+            {/* Quest Board */}
             <div
+              className="vv-quest-board"
               style={{
-                fontSize: 9,
-                textTransform: "uppercase",
-                letterSpacing: "0.14em",
-                color: "#fcd34d",
-                fontWeight: 700,
-                marginBottom: 8,
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
+                padding: "12px 14px",
+                borderBottom: "1px solid var(--vv-border-subtle)",
+                background: "rgba(245,158,11,0.04)",
               }}
             >
-              <Trophy size={11} color="#fcd34d" />
-              Knowledge Quests
-            </div>
-            {[
-              { label: "Discover 12 nodes", current: Math.max(graphData.nodes.length - 1, 0), max: 12 },
-              { label: "Generate 6 flashcards", current: metrics.leaves, max: 6 },
-              { label: "Blossom 4 nodes", current: metrics.flowers, max: 4 },
-              { label: "Complete 2 quizzes", current: metrics.fruits, max: 2 },
-            ].map(({ label, current, max }) => {
-              const progress = Math.min(current / max, 1);
-              const done = progress >= 1;
-              return (
-                <div key={label} style={{ marginBottom: 7 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: 11,
-                      marginBottom: 3,
-                      color: done ? "#6ee7b7" : "var(--vv-text-secondary)",
-                    }}
-                  >
-                    <span>{label}</span>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 10 }}>
-                      {Math.min(current, max)}/{max}
-                    </span>
-                  </div>
-                  <div className="progress-bar">
+              <div
+                style={{
+                  fontSize: 9,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.14em",
+                  color: "#fcd34d",
+                  fontWeight: 700,
+                  marginBottom: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                }}
+              >
+                <Trophy size={11} color="#fcd34d" />
+                Knowledge Quests
+              </div>
+              {[
+                {
+                  label: "Discover 12 nodes",
+                  current: Math.max(graphData.nodes.length - 1, 0),
+                  max: 12,
+                },
+                {
+                  label: "Generate 6 flashcards",
+                  current: metrics.leaves,
+                  max: 6,
+                },
+                { label: "Blossom 4 nodes", current: metrics.flowers, max: 4 },
+                {
+                  label: "Complete 2 quizzes",
+                  current: metrics.fruits,
+                  max: 2,
+                },
+              ].map(({ label, current, max }) => {
+                const progress = Math.min(current / max, 1);
+                const done = progress >= 1;
+                return (
+                  <div key={label} style={{ marginBottom: 7 }}>
                     <div
-                      className="progress-bar-fill"
                       style={{
-                        width: `${progress * 100}%`,
-                        background: done
-                          ? "linear-gradient(90deg, #10b981, #6ee7b7)"
-                          : "linear-gradient(90deg, #7c3aed, #06b6d4)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: 11,
+                        marginBottom: 3,
+                        color: done ? "#6ee7b7" : "var(--vv-text-secondary)",
                       }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Graph Stats */}
-          <div
-            className="vv-stats-row"
-            style={{
-              padding: "10px 14px",
-              borderBottom: "1px solid var(--vv-border-subtle)",
-              display: "flex",
-              gap: 8,
-            }}
-          >
-            {[
-              { label: "Nodes", value: graphData.nodes.length, color: "#c4b5fd" },
-              { label: "Links", value: graphData.links.length, color: "#67e8f9" },
-              { label: "Learned", value: metrics.completed, color: "#6ee7b7" },
-            ].map(({ label, value, color }) => (
-              <div
-                key={label}
-                style={{
-                  flex: 1,
-                  textAlign: "center",
-                  padding: "6px 4px",
-                  background: "rgba(255,255,255,0.03)",
-                  borderRadius: 8,
-                  border: "1px solid var(--vv-border-subtle)",
-                }}
-              >
-                <div style={{ fontSize: 16, fontWeight: 700, color, fontFamily: "var(--font-mono)" }}>
-                  {value}
-                </div>
-                <div style={{ fontSize: 9, textTransform: "uppercase", color: "var(--vv-text-muted)", letterSpacing: "0.08em" }}>
-                  {label}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Node Inspector / Flashcards / Quiz */}
-          <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "12px 14px" }}>
-            {!selectedNode ? (
-              <div
-                style={{
-                  textAlign: "center",
-                  paddingTop: 24,
-                  color: "var(--vv-text-muted)",
-                }}
-              >
-                <Target size={28} style={{ margin: "0 auto 8px", opacity: 0.3 }} />
-                <div style={{ fontSize: 12 }}>
-                  Select a tool and click a node to inspect it
-                </div>
-              </div>
-            ) : (
-              <div className="animate-slide-in">
-                {/* Node Header */}
-                <div style={{ marginBottom: 10 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 8,
-                      marginBottom: 6,
-                    }}
-                  >
-                    {selectedNode.score !== undefined && (
-                      <ScoreRing score={selectedNode.score} />
-                    )}
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: "var(--vv-text-primary)",
-                          lineHeight: 1.3,
-                          fontFamily: "var(--font-display)",
-                        }}
+                    >
+                      <span>{label}</span>
+                      <span
+                        style={{ fontFamily: "var(--font-mono)", fontSize: 10 }}
                       >
-                        {selectedNode.label}
-                      </div>
-                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
-                        <span
-                          className={`badge ${selectedNode.synthetic ? "badge-primary" : "badge-accent"}`}
-                        >
-                          {selectedNode.synthetic ? "AI Generated" : "Atlas Doc"}
-                        </span>
-                        {selectedNode.nodeKind && (
-                          <span className="badge badge-gold">{selectedNode.nodeKind}</span>
-                        )}
-                        {selectedNode.completed && (
-                          <span className="badge badge-emerald">Learned ✓</span>
-                        )}
-                      </div>
+                        {Math.min(current, max)}/{max}
+                      </span>
+                    </div>
+                    <div className="progress-bar">
+                      <div
+                        className="progress-bar-fill"
+                        style={{
+                          width: `${progress * 100}%`,
+                          background: done
+                            ? "linear-gradient(90deg, #10b981, #6ee7b7)"
+                            : "linear-gradient(90deg, #7c3aed, #06b6d4)",
+                        }}
+                      />
                     </div>
                   </div>
+                );
+              })}
+            </div>
 
+            {/* Graph Stats */}
+            <div
+              className="vv-stats-row"
+              style={{
+                padding: "10px 14px",
+                borderBottom: "1px solid var(--vv-border-subtle)",
+                display: "flex",
+                gap: 8,
+              }}
+            >
+              {[
+                {
+                  label: "Nodes",
+                  value: graphData.nodes.length,
+                  color: "#c4b5fd",
+                },
+                {
+                  label: "Links",
+                  value: graphData.links.length,
+                  color: "#67e8f9",
+                },
+                {
+                  label: "Learned",
+                  value: metrics.completed,
+                  color: "#6ee7b7",
+                },
+              ].map(({ label, value, color }) => (
+                <div
+                  key={label}
+                  style={{
+                    flex: 1,
+                    textAlign: "center",
+                    padding: "6px 4px",
+                    background: "rgba(255,255,255,0.03)",
+                    borderRadius: 8,
+                    border: "1px solid var(--vv-border-subtle)",
+                  }}
+                >
                   <div
                     style={{
-                      fontSize: 12,
-                      color: "var(--vv-text-secondary)",
-                      lineHeight: 1.6,
+                      fontSize: 16,
+                      fontWeight: 700,
+                      color,
+                      fontFamily: "var(--font-mono)",
                     }}
                   >
-                    {selectedNode.summary || selectedNode.text || "No summary available"}
+                    {value}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 9,
+                      textTransform: "uppercase",
+                      color: "var(--vv-text-muted)",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    {label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Node Inspector / Flashcards / Quiz */}
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto",
+                padding: "12px 14px",
+              }}
+            >
+              {!selectedNode ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    paddingTop: 24,
+                    color: "var(--vv-text-muted)",
+                  }}
+                >
+                  <Target
+                    size={28}
+                    style={{ margin: "0 auto 8px", opacity: 0.3 }}
+                  />
+                  <div style={{ fontSize: 12 }}>
+                    Select a tool and click a node to inspect it
+                  </div>
+                </div>
+              ) : (
+                <div className="animate-slide-in">
+                  {/* Node Header */}
+                  <div style={{ marginBottom: 10 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 8,
+                        marginBottom: 6,
+                      }}
+                    >
+                      {selectedNode.score !== undefined && (
+                        <ScoreRing score={selectedNode.score} />
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 700,
+                            color: "var(--vv-text-primary)",
+                            lineHeight: 1.3,
+                            fontFamily: "var(--font-display)",
+                          }}
+                        >
+                          {selectedNode.label}
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 4,
+                            flexWrap: "wrap",
+                            marginTop: 4,
+                          }}
+                        >
+                          <span
+                            className={`badge ${selectedNode.synthetic ? "badge-primary" : "badge-accent"}`}
+                          >
+                            {selectedNode.synthetic
+                              ? "AI Generated"
+                              : "Atlas Doc"}
+                          </span>
+                          {selectedNode.nodeKind && (
+                            <span className="badge badge-gold">
+                              {selectedNode.nodeKind}
+                            </span>
+                          )}
+                          {selectedNode.completed && (
+                            <span className="badge badge-emerald">
+                              Learned ✓
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "var(--vv-text-secondary)",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {selectedNode.summary ||
+                        selectedNode.text ||
+                        "No summary available"}
+                    </div>
+
+                    {selectedNode.source && (
+                      <div
+                        style={{
+                          marginTop: 6,
+                          fontSize: 10,
+                          color: "var(--vv-text-muted)",
+                        }}
+                      >
+                        Source: {selectedNode.source}
+                        {selectedNode.sourceUrl && (
+                          <a
+                            href={selectedNode.sourceUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ marginLeft: 6, color: "#67e8f9" }}
+                          >
+                            <ExternalLink
+                              size={10}
+                              style={{ display: "inline" }}
+                            />
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {loadingNodeIds.has(selectedNode.id) && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 5,
+                          marginTop: 6,
+                          fontSize: 11,
+                          color: "#fcd34d",
+                        }}
+                      >
+                        <Loader2
+                          size={11}
+                          className="animate-spin"
+                          color="#f59e0b"
+                        />
+                        Processing...
+                      </div>
+                    )}
                   </div>
 
-                  {selectedNode.source && (
-                    <div style={{ marginTop: 6, fontSize: 10, color: "var(--vv-text-muted)" }}>
-                      Source: {selectedNode.source}
-                      {selectedNode.sourceUrl && (
-                        <a
-                          href={selectedNode.sourceUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{ marginLeft: 6, color: "#67e8f9" }}
+                  {/* Quick Actions */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 6,
+                      flexWrap: "wrap",
+                      marginBottom: 12,
+                    }}
+                  >
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => void explore(selectedNode)}
+                    >
+                      <Plus size={11} /> Expand
+                    </button>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => void generateFlashcards(selectedNode)}
+                    >
+                      <Leaf size={11} /> Cards
+                    </button>
+                    {!selectedNode.completed && (
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => blossomNode(selectedNode)}
+                      >
+                        <Flower2 size={11} /> Learn
+                      </button>
+                    )}
+                    {selectedNode.completed && (
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => void generateFruitQuiz(selectedNode)}
+                      >
+                        <Apple size={11} /> Quiz
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="divider" />
+
+                  {/* Flashcards */}
+                  {selectedNode.flashcards &&
+                    selectedNode.flashcards.length > 0 && (
+                      <div style={{ marginBottom: 12 }}>
+                        <div
+                          style={{
+                            fontSize: 9,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.12em",
+                            color: "#c4b5fd",
+                            fontWeight: 700,
+                            marginBottom: 8,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
                         >
-                          <ExternalLink size={10} style={{ display: "inline" }} />
-                        </a>
+                          <Leaf size={10} color="#c4b5fd" />
+                          Flashcards · tap to flip
+                        </div>
+                        {selectedNode.flashcards.map((card, i) => (
+                          <FlashCard key={i} card={card} index={i} />
+                        ))}
+                      </div>
+                    )}
+
+                  {/* Quiz */}
+                  {quiz.length > 0 && quizNodeId === selectedNode.id && (
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 9,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.12em",
+                          color: "#f9a8d4",
+                          fontWeight: 700,
+                          marginBottom: 8,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Apple size={10} color="#ec4899" />
+                        Knowledge Quiz
+                      </div>
+                      {quiz.map((q, i) => (
+                        <div
+                          key={i}
+                          className="vv-card"
+                          style={{ marginBottom: 8, padding: "10px 12px" }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 600,
+                              marginBottom: 7,
+                              color: "var(--vv-text-primary)",
+                            }}
+                          >
+                            {i + 1}. {q.question}
+                          </div>
+                          {q.options.map((opt, j) => {
+                            const selected = quizAnswers[i] === j;
+                            const revealed = quizResult !== null;
+                            const correct = opt === q.correctAnswer;
+                            let bg = "rgba(255,255,255,0.04)";
+                            let border = "var(--vv-border-subtle)";
+                            let color = "var(--vv-text-secondary)";
+                            if (selected && !revealed) {
+                              bg = "rgba(124,58,237,0.15)";
+                              border = "rgba(124,58,237,0.5)";
+                              color = "#c4b5fd";
+                            }
+                            if (revealed && correct) {
+                              bg = "rgba(16,185,129,0.12)";
+                              border = "rgba(16,185,129,0.4)";
+                              color = "#6ee7b7";
+                            }
+                            if (revealed && selected && !correct) {
+                              bg = "rgba(239,68,68,0.12)";
+                              border = "rgba(239,68,68,0.4)";
+                              color = "#fca5a5";
+                            }
+
+                            return (
+                              <button
+                                key={j}
+                                onClick={() =>
+                                  setQuizAnswers((prev) => {
+                                    const n = [...prev];
+                                    n[i] = j;
+                                    return n;
+                                  })
+                                }
+                                disabled={!!quizResult}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  textAlign: "left",
+                                  padding: "6px 10px",
+                                  marginBottom: 4,
+                                  borderRadius: 7,
+                                  fontSize: 11,
+                                  border: `1px solid ${border}`,
+                                  background: bg,
+                                  color,
+                                  cursor: quizResult ? "default" : "pointer",
+                                  transition: "all 0.15s",
+                                  fontFamily: "var(--font-base)",
+                                }}
+                              >
+                                {opt}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ))}
+
+                      {!quizResult ? (
+                        <button
+                          className="btn btn-primary btn-sm"
+                          onClick={submitQuiz}
+                          style={{ width: "100%", justifyContent: "center" }}
+                        >
+                          <Sparkles size={12} />
+                          Submit Quiz
+                        </button>
+                      ) : (
+                        <div
+                          style={{
+                            textAlign: "center",
+                            padding: 12,
+                            borderRadius: 10,
+                            background:
+                              quizResult.correct / quizResult.total >= 0.7
+                                ? "rgba(16,185,129,0.1)"
+                                : "rgba(239,68,68,0.08)",
+                            border: `1px solid ${quizResult.correct / quizResult.total >= 0.7 ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.25)"}`,
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 22,
+                              fontWeight: 800,
+                              fontFamily: "var(--font-display)",
+                              color:
+                                quizResult.correct / quizResult.total >= 0.7
+                                  ? "#6ee7b7"
+                                  : "#fca5a5",
+                              marginBottom: 2,
+                            }}
+                          >
+                            {quizResult.correct}/{quizResult.total}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: "var(--vv-text-muted)",
+                            }}
+                          >
+                            {Math.round(
+                              (quizResult.correct / quizResult.total) * 100,
+                            )}
+                            % accuracy
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}
-
-                  {loadingNodeIds.has(selectedNode.id) && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 5,
-                        marginTop: 6,
-                        fontSize: 11,
-                        color: "#fcd34d",
-                      }}
-                    >
-                      <Loader2 size={11} className="animate-spin" color="#f59e0b" />
-                      Processing...
-                    </div>
-                  )}
                 </div>
+              )}
 
-                {/* Quick Actions */}
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => void explore(selectedNode)}
-                  >
-                    <Plus size={11} /> Expand
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => void generateFlashcards(selectedNode)}
-                  >
-                    <Leaf size={11} /> Cards
-                  </button>
-                  {!selectedNode.completed && (
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => blossomNode(selectedNode)}
-                    >
-                      <Flower2 size={11} /> Learn
-                    </button>
-                  )}
-                  {selectedNode.completed && (
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => void generateFruitQuiz(selectedNode)}
-                    >
-                      <Apple size={11} /> Quiz
-                    </button>
-                  )}
-                </div>
-
-                <div className="divider" />
-
-                {/* Flashcards */}
-                {selectedNode.flashcards && selectedNode.flashcards.length > 0 && (
-                  <div style={{ marginBottom: 12 }}>
-                    <div
-                      style={{
-                        fontSize: 9,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.12em",
-                        color: "#c4b5fd",
-                        fontWeight: 700,
-                        marginBottom: 8,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <Leaf size={10} color="#c4b5fd" />
-                      Flashcards · tap to flip
-                    </div>
-                    {selectedNode.flashcards.map((card, i) => (
-                      <FlashCard key={i} card={card} index={i} />
-                    ))}
-                  </div>
-                )}
-
-                {/* Quiz */}
-                {quiz.length > 0 && quizNodeId === selectedNode.id && (
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 9,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.12em",
-                        color: "#f9a8d4",
-                        fontWeight: 700,
-                        marginBottom: 8,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <Apple size={10} color="#ec4899" />
-                      Knowledge Quiz
-                    </div>
-                    {quiz.map((q, i) => (
-                      <div
-                        key={i}
-                        className="vv-card"
-                        style={{ marginBottom: 8, padding: "10px 12px" }}
-                      >
-                        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 7, color: "var(--vv-text-primary)" }}>
-                          {i + 1}. {q.question}
-                        </div>
-                        {q.options.map((opt, j) => {
-                          const selected = quizAnswers[i] === j;
-                          const revealed = quizResult !== null;
-                          const correct = opt === q.correctAnswer;
-                          let bg = "rgba(255,255,255,0.04)";
-                          let border = "var(--vv-border-subtle)";
-                          let color = "var(--vv-text-secondary)";
-                          if (selected && !revealed) { bg = "rgba(124,58,237,0.15)"; border = "rgba(124,58,237,0.5)"; color = "#c4b5fd"; }
-                          if (revealed && correct) { bg = "rgba(16,185,129,0.12)"; border = "rgba(16,185,129,0.4)"; color = "#6ee7b7"; }
-                          if (revealed && selected && !correct) { bg = "rgba(239,68,68,0.12)"; border = "rgba(239,68,68,0.4)"; color = "#fca5a5"; }
-
-                          return (
-                            <button
-                              key={j}
-                              onClick={() =>
-                                setQuizAnswers((prev) => {
-                                  const n = [...prev];
-                                  n[i] = j;
-                                  return n;
-                                })
-                              }
-                              disabled={!!quizResult}
-                              style={{
-                                display: "block",
-                                width: "100%",
-                                textAlign: "left",
-                                padding: "6px 10px",
-                                marginBottom: 4,
-                                borderRadius: 7,
-                                fontSize: 11,
-                                border: `1px solid ${border}`,
-                                background: bg,
-                                color,
-                                cursor: quizResult ? "default" : "pointer",
-                                transition: "all 0.15s",
-                                fontFamily: "var(--font-base)",
-                              }}
-                            >
-                              {opt}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ))}
-
-                    {!quizResult ? (
-                      <button
-                        className="btn btn-primary btn-sm"
-                        onClick={submitQuiz}
-                        style={{ width: "100%", justifyContent: "center" }}
-                      >
-                        <Sparkles size={12} />
-                        Submit Quiz
-                      </button>
-                    ) : (
-                      <div
+              {/* Negative Keyword Buffer */}
+              {negativePromptKeywords.length > 0 && (
+                <div style={{ marginTop: 14 }}>
+                  <div className="section-label">Pruned Keywords</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {negativePromptKeywords.slice(0, 15).map((kw) => (
+                      <span
+                        key={kw}
                         style={{
-                          textAlign: "center",
-                          padding: 12,
-                          borderRadius: 10,
-                          background:
-                            quizResult.correct / quizResult.total >= 0.7
-                              ? "rgba(16,185,129,0.1)"
-                              : "rgba(239,68,68,0.08)",
-                          border: `1px solid ${quizResult.correct / quizResult.total >= 0.7 ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.25)"}`,
+                          padding: "2px 7px",
+                          borderRadius: 99,
+                          fontSize: 10,
+                          background: "rgba(239,68,68,0.08)",
+                          border: "1px solid rgba(239,68,68,0.2)",
+                          color: "#fca5a5",
                         }}
                       >
-                        <div
-                          style={{
-                            fontSize: 22,
-                            fontWeight: 800,
-                            fontFamily: "var(--font-display)",
-                            color: quizResult.correct / quizResult.total >= 0.7 ? "#6ee7b7" : "#fca5a5",
-                            marginBottom: 2,
-                          }}
-                        >
-                          {quizResult.correct}/{quizResult.total}
-                        </div>
-                        <div style={{ fontSize: 11, color: "var(--vv-text-muted)" }}>
-                          {Math.round((quizResult.correct / quizResult.total) * 100)}% accuracy
-                        </div>
-                      </div>
-                    )}
+                        {kw}
+                      </span>
+                    ))}
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Negative Keyword Buffer */}
-            {negativePromptKeywords.length > 0 && (
-              <div style={{ marginTop: 14 }}>
-                <div className="section-label">Pruned Keywords</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {negativePromptKeywords.slice(0, 15).map((kw) => (
-                    <span
-                      key={kw}
-                      style={{
-                        padding: "2px 7px",
-                        borderRadius: 99,
-                        fontSize: 10,
-                        background: "rgba(239,68,68,0.08)",
-                        border: "1px solid rgba(239,68,68,0.2)",
-                        color: "#fca5a5",
-                      }}
-                    >
-                      {kw}
-                    </span>
-                  ))}
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* Footer: Active Tool Indicator */}
-          <div
-            style={{
-              padding: "8px 14px",
-              borderTop: "1px solid var(--vv-border-subtle)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              fontSize: 10,
-              color: "var(--vv-text-muted)",
-            }}
-          >
-            <span>
-              Active:{" "}
-              <span
-                style={{
-                  color: TOOL_DEFS.find((t) => t.id === activeTool)?.color || "white",
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                }}
-              >
-                {activeTool}
+            {/* Footer: Active Tool Indicator */}
+            <div
+              style={{
+                padding: "8px 14px",
+                borderTop: "1px solid var(--vv-border-subtle)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                fontSize: 10,
+                color: "var(--vv-text-muted)",
+              }}
+            >
+              <span>
+                Active:{" "}
+                <span
+                  style={{
+                    color:
+                      TOOL_DEFS.find((t) => t.id === activeTool)?.color ||
+                      "white",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {activeTool}
+                </span>
               </span>
-            </span>
-            <span>R = Ritual {ritualMode ? "●" : "○"}</span>
-          </div>
-        </aside>
+              <span>R = Ritual {ritualMode ? "●" : "○"}</span>
+            </div>
+          </aside>
         )}
       </main>
 
@@ -1663,9 +2021,15 @@ export default function App() {
               }}
             >
               <span style={{ color: "var(--vv-text-secondary)" }}>
-                Active Tool: <strong style={{ color: "var(--vv-text-primary)" }}>{activeTool}</strong>
+                Active Tool:{" "}
+                <strong style={{ color: "var(--vv-text-primary)" }}>
+                  {activeTool}
+                </strong>
               </span>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowMobileInspector(false)}>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setShowMobileInspector(false)}
+              >
                 Close
               </button>
             </div>
@@ -1674,7 +2038,10 @@ export default function App() {
               <div style={{ marginBottom: 12 }}>
                 <div className="section-label">Saved Sessions</div>
                 <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-                  <button className="btn btn-ghost btn-sm" onClick={saveSession}>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={saveSession}
+                  >
                     Save Local
                   </button>
                   <button
@@ -1686,7 +2053,9 @@ export default function App() {
                     Save Cloud
                   </button>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 6 }}
+                >
                   {savedSessions.slice(0, 6).map((session) => (
                     <button
                       key={session.id}
@@ -1700,16 +2069,26 @@ export default function App() {
                         opacity: activeSessionId === session.id ? 1 : 0.85,
                       }}
                     >
-                      <span style={{ maxWidth: "70%", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <span
+                        style={{
+                          maxWidth: "70%",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
                         {session.query}
                       </span>
-                      <span style={{ fontSize: 10, color: "var(--vv-text-muted)" }}>
+                      <span
+                        style={{ fontSize: 10, color: "var(--vv-text-muted)" }}
+                      >
                         {new Date(session.savedAt).toLocaleTimeString()}
                       </span>
                     </button>
                   ))}
                   {savedSessions.length === 0 && (
-                    <div style={{ fontSize: 11, color: "var(--vv-text-muted)" }}>
+                    <div
+                      style={{ fontSize: 11, color: "var(--vv-text-muted)" }}
+                    >
                       No saved sessions yet.
                     </div>
                   )}
@@ -1717,7 +2096,13 @@ export default function App() {
                 {cloudSessions.length > 0 && (
                   <div style={{ marginTop: 10 }}>
                     <div className="section-label">Cloud Sessions</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 6,
+                      }}
+                    >
                       {cloudSessions.slice(0, 6).map((session) => (
                         <button
                           key={`cloud-${session.id}`}
@@ -1728,13 +2113,25 @@ export default function App() {
                           }}
                           style={{
                             justifyContent: "space-between",
-                            opacity: activeCloudSessionId === session.id ? 1 : 0.85,
+                            opacity:
+                              activeCloudSessionId === session.id ? 1 : 0.85,
                           }}
                         >
-                          <span style={{ maxWidth: "70%", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          <span
+                            style={{
+                              maxWidth: "70%",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
                             {session.query}
                           </span>
-                          <span style={{ fontSize: 10, color: "var(--vv-text-muted)" }}>
+                          <span
+                            style={{
+                              fontSize: 10,
+                              color: "var(--vv-text-muted)",
+                            }}
+                          >
                             {session.nodeCount}
                           </span>
                         </button>
@@ -1747,42 +2144,79 @@ export default function App() {
               {selectedNode ? (
                 <div>
                   <div className="section-label">Selected Node</div>
-                  <div className="vv-card" style={{ padding: 12, marginBottom: 8 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>
+                  <div
+                    className="vv-card"
+                    style={{ padding: 12, marginBottom: 8 }}
+                  >
+                    <div
+                      style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}
+                    >
                       {selectedNode.label}
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--vv-text-secondary)", lineHeight: 1.55 }}>
-                      {selectedNode.summary || selectedNode.text || "No summary available"}
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "var(--vv-text-secondary)",
+                        lineHeight: 1.55,
+                      }}
+                    >
+                      {selectedNode.summary ||
+                        selectedNode.text ||
+                        "No summary available"}
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-                    <button className="btn btn-ghost btn-sm" onClick={() => void explore(selectedNode)}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 6,
+                      flexWrap: "wrap",
+                      marginBottom: 10,
+                    }}
+                  >
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => void explore(selectedNode)}
+                    >
                       <Plus size={11} /> Expand
                     </button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => void generateFlashcards(selectedNode)}>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => void generateFlashcards(selectedNode)}
+                    >
                       <Leaf size={11} /> Cards
                     </button>
                     {!selectedNode.completed && (
-                      <button className="btn btn-ghost btn-sm" onClick={() => blossomNode(selectedNode)}>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => blossomNode(selectedNode)}
+                      >
                         <Flower2 size={11} /> Learn
                       </button>
                     )}
                     {selectedNode.completed && (
-                      <button className="btn btn-ghost btn-sm" onClick={() => void generateFruitQuiz(selectedNode)}>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => void generateFruitQuiz(selectedNode)}
+                      >
                         <Apple size={11} /> Quiz
                       </button>
                     )}
                   </div>
 
-                  {selectedNode.flashcards && selectedNode.flashcards.length > 0 && (
-                    <div>
-                      <div className="section-label">Flashcards</div>
-                      {selectedNode.flashcards.map((card, i) => (
-                        <FlashCard key={`mobile-${i}`} card={card} index={i} />
-                      ))}
-                    </div>
-                  )}
+                  {selectedNode.flashcards &&
+                    selectedNode.flashcards.length > 0 && (
+                      <div>
+                        <div className="section-label">Flashcards</div>
+                        {selectedNode.flashcards.map((card, i) => (
+                          <FlashCard
+                            key={`mobile-${i}`}
+                            card={card}
+                            index={i}
+                          />
+                        ))}
+                      </div>
+                    )}
                 </div>
               ) : (
                 <div style={{ fontSize: 12, color: "var(--vv-text-muted)" }}>
