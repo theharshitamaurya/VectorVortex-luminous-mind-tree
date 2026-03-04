@@ -1,5 +1,8 @@
 # perplexitree - AI-Powered Knowledge Tree Game
 
+<img width="1920" height="912" alt="VectorVortex-—-Semantic-Knowledge-Explorer-for-MongoDB" src="https://github.com/user-attachments/assets/b83d6ac3-ea4f-407a-bb32-70331710fd72" />
+
+
 - Live at: 
 - Live demo: 
 
