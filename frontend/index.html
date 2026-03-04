@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Intellihire</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <h1>Intellihire</h1>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="controls">
+      <button id="restartBtn" title="restart game">
+        <i class="fas fa-redo"></i>
+      </button>
+      <button id="dayNightBtn" title="toggle day/night mode">
+        <i class="fas fa-moon"></i>
+      </button>
+      <button id="saveBtn" title="save game state">
+        <i class="fas fa-save"></i>
+      </button>
+      <button id="loadBtn" title="load game state">
+        <i class="fas fa-folder-open"></i>
+      </button>
+    </div>
+
+    <div class="toolbar">
+      <button
+        id="panTool"
+        class="tool-btn"
+        title="pan tool - drag to move around the view"
+      >
+        <i class="fas fa-arrows-alt"></i>
+      </button>
+      <button
+        id="studyTool"
+        class="tool-btn"
+        title="study tool - hover to see search results"
+      >
+        <i class="fas fa-search"></i>
+      </button>
+      <button
+        id="growthTool"
+        class="tool-btn active"
+        title="growth tool - click on nodes to grow branches"
+      >
+        <i class="fas fa-plus"></i>
+      </button>
+      <button
+        id="cutTool"
+        class="tool-btn"
+        title="cut tool - click and drag to prune branches"
+      >
+        <i class="fas fa-cut"></i>
+      </button>
+      <button
+        id="leavesTool"
+        class="tool-btn"
+        title="flashcard tool - click on nodes to create flashcards"
+      >
+        <i class="fas fa-leaf"></i>
+      </button>
+      <button
+        id="flowerTool"
+        class="tool-btn"
+        title="blossom your knowledge - click on branch ends to add flowers"
+      >
+        <i class="fas fa-seedling"></i>
+      </button>
+      <button
+        id="fruitTool"
+        class="tool-btn"
+        title="bear fruit of labour - click on flowers to transform them into apples"
+      >
+        <i class="fas fa-apple-alt"></i>
+      </button>
+      <button
+        id="harvestTool"
+        class="tool-btn"
+        title="harvest knowledge - click on apples to take a quiz"
+      >
+        <i class="fas fa-hand-paper"></i>
+      </button>
+      <button
+        id="repositionTool"
+        class="tool-btn"
+        title="reposition tool - drag branch ends to move and resize"
+      >
+        <i class="fas fa-edit"></i>
+      </button>
+    </div>
+
+    <div class="status" id="status">Game ready!</div>
+
+    <!-- Modal for study tool results -->
+    <div id="studyModal" class="study-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Topic Information</h3>
+          <div class="modal-controls">
+            <button
+              id="readFromSourceBtn"
+              class="modal-btn"
+              title="read from source"
+              style="display: none"
+            >
+              ðŸ“–
+            </button>
+            <button
+              id="showFlashcardsBtn"
+              class="modal-btn"
+              title="show flashcards for this topic"
+              style="display: none"
+            >
+              ðŸ“š
+            </button>
+            <button id="closeModal" class="modal-btn" title="close">Ã—</button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <p id="modalDescription"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for loading game sessions -->
+    <div id="loadModal" class="study-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Load Game Session</h3>
+          <div class="modal-controls">
+            <button id="closeLoadModal" class="modal-btn" title="close">
+              Ã—
+            </button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div id="sessionsList">
+            <p>Loading sessions...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for quiz -->
+    <div id="quizModal" class="study-modal">
+      <div class="modal-content quiz-modal-content">
+        <div class="modal-header">
+          <h3 id="quizTitle">Knowledge Quiz</h3>
+          <div class="modal-controls">
+            <button id="closeQuizModal" class="modal-btn" title="close">
+              Ã—
+            </button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div id="quizContent">
+            <div id="quizQuestion" class="quiz-question"></div>
+            <div id="quizOptions" class="quiz-options"></div>
+            <div
+              id="quizResult"
+              class="quiz-result"
+              style="display: none"
+            ></div>
+            <div id="quizScore" class="quiz-score" style="display: none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Scripts -->
+    <script src="/static/js/flashcards.js?v=67"></script>
+    <script src="/static/js/quiz.js?v=67"></script>
+    <script src="/static/js/searchManager.js?v=67"></script>
+    <script src="/static/js/welcomeManager.js?v=67"></script>
+    <script src="/static/js/uiManager.js?v=67"></script>
+    <script src="/static/js/cameraController.js?v=67"></script>
+    <script src="/static/js/treeManager.js?v=67"></script>
+    <script src="/static/js/learningFeature.js?v=67"></script>
+    <script src="/static/js/toolManager.js?v=67"></script>
+    <script src="/static/js/interactionManager.js?v=67"></script>
+    <script src="/static/js/game.js?v=67"></script>
+    <script src="/static/js/pruning.js?v=67"></script>
+    <script src="/static/js/renderer.js?v=67"></script>
+    <script src="/static/js/app.js?v=67"></script>
+  </body>
+</html>

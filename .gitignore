@@ -1,0 +1,28 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+
+# Virtual environments
+venv/
+
+# Node.js
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.dev.*.log
+
+# Vercel
+.vercel/
+vercel.json
+api/
+
+# Documentation
+ARCHITECTURE.md
+DEPLOYMENT.md
+
+# Helpers
+notify.py
